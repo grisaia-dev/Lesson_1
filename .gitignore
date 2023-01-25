@@ -1,3 +1,7 @@
 Task_1/*.vcxproj.filters
 Task_1/*.vcxproj.user
 Task_1/.vs
+Task_1/build
+Task_1/out.txt
+Task_1/x64
+Task_1/x32
