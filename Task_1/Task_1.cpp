@@ -25,32 +25,18 @@ void write_array(int* _array, unsigned const int* width, std::ofstream &_file) {
     _file << "\n";
 }
 
-void work_with_array(int* _array1, int* _array2, unsigned int* width, std::ifstream& _file1, std::ofstream& _file2) {
-    // Работа с первым массивом
-    fill_array(_array1, _file1, width);
+void shift_left(int *_array, unsigned const int *_width) {
+    const int temp = _array[0];
+    for (unsigned int i = 0; i < (*_width - 1); ++i)
+        _array[i] = _array[i + 1];
+    _array[*_width - 1] = temp;
+}
 
-    int temp = _array1[0];
-    for (unsigned int i = 0; i < (*width - 1); ++i)
-        _array1[i] = _array1[i + 1];
-    _array1[*width - 1] = temp;
-
-    unsigned const int temp_width = *width; // Хранение размера первого массива
-
-    // Работа над вторым массивом
-    _file1 >> *width;
-    fill_array(_array2, _file1, width);
-
-    temp = _array2[*width - 1];
-    for (unsigned int i = *width - 1; i > 0; --i)
-        _array2[i] = _array2[i - 1];
-    _array2[0] = temp;
-
-    write_array(_array2, width, _file2); // Записываем второй массив в файл
-    write_array(_array1, &temp_width, _file2); // Записываем первый массив в файл
-
-    // Закрываем файлы
-    _file1.close();
-    _file2.close();
+void shift_right(int *_array, unsigned const int *_width) {
+    const int temp = _array[*_width - 1];
+    for (unsigned int i = *_width - 1; i > 0; --i)
+        _array[i] = _array[i - 1];
+    _array[0] = temp;
 }
 
 int main(void) {
@@ -60,18 +46,33 @@ int main(void) {
     if (i_file.is_open() && o_file.is_open()) {
         unsigned int width = 0;
 
+        // Работа с первым массивом
         i_file >> width;
         int* num_array1 = Memory::dynamic_array_alloc(&width);
+        fill_array(num_array1, i_file, &width);
+        shift_left(num_array1, &width);
+
+        unsigned const int temp_width = width; // Хранение размера первого массива
+
+        // Работа с вторым массивом
+        i_file >> width;
         int* num_array2 = Memory::dynamic_array_alloc(&width);
+        fill_array(num_array2, i_file, &width);
+        shift_right(num_array2, &width);
 
-        work_with_array(num_array1, num_array2, &width, i_file, o_file);
+        // Запись массивов и размер массива в файл
+        write_array(num_array2, &width, o_file);
+        write_array(num_array1, &temp_width, o_file);
+        
+        // Закрываем файлы
+        i_file.close();
+        o_file.close();
 
+        // Очищаем память
         Memory::dynamic_array_free(num_array1);
         Memory::dynamic_array_free(num_array2);
     } else {
-       
         std::cout << "File don't open!\n Create file and fill him of data!" << std::endl;
     }
-
     return 0;
 }
